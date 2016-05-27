@@ -6,6 +6,6 @@
  * Date: 26.05.16
  * Time: 12:59
  */
-class Nullable {
-
+interface Nullable {
+    public function isNullable ();
 }

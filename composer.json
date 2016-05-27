@@ -1,0 +1,8 @@
+{
+    "require": {
+        "twig/twig": "~1.0",
+        "twbs/bootstrap": "^3.3",
+        "components/jquery": "^2.2",
+        "nostalgiaz/bootstrap-switch": "^3.3"
+    }
+}

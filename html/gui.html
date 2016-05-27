@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet"
+          href="vendor/twbs/bootstrap/dist/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container-fluid">
+    {% for variableName, variableValue in variables %}
+        {{ variableName }}
+        <input type="number"
+               name="{{ variableName }}"
+               min="0"
+               max="65535"
+               step="10"
+               value="{{ variableValue }}"><br>
+    {% endfor %}
+</div>
+</body>
+
+<script src="vendor/components/jquery/jquery.min.js"></script>
+<script src="vendor/twbs/bootstrap/dist/js/bootstrap.min.js"></script>
+</html>
