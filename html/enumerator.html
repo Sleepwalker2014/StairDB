@@ -1,0 +1,6 @@
+<select>
+    {% for possibleValue in elementValues.possibleValues %}
+        <option value="{{ possibleValue }}"
+                {% if elementValues.value == possibleValue %}selected{% endif %}>{{ possibleValue }}</option>
+    {% endfor %}
+</select>

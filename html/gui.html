@@ -8,14 +8,12 @@
 </head>
 <body>
 <div class="container-fluid">
-    {% for variableName, variableValue in variables %}
-        {{ variableName }}
-        <input type="number"
-               name="{{ variableName }}"
-               min="0"
-               max="65535"
-               step="10"
-               value="{{ variableValue }}"><br>
+    {% for elementName, elementValues in variables %}
+        {{ elementName }}
+
+        {% include elementValues.elementTemplate %}
+        <br>
+
     {% endfor %}
 </div>
 </body>
