@@ -176,8 +176,108 @@ function retrieveInputType ($variableName, $variableValue) {
             return new TextInput($variableValue, '');
         case 'insert_id':
             return new TextInput($variableValue, '');
+        case 'socket':
+            return new DirectoryPicker($variableValue, '/tmp/mysql.sock');
+        case 'sort_buffer_size':
+            return new NumberPicker($variableValue, 32768, 18446744073709551615, 262144);
+        case 'sql_auto_is_null':
+            return new checkbox($variableValue, false);
+        case 'sql_big_selects':
+            return new checkbox($variableValue, true);
+        case 'sql_buffer_result':
+            return new checkbox($variableValue, false);
+        case 'sql_log_bin':
+            return new checkbox($variableValue, true);
+        case 'sql_log_off':
+            return new checkbox($variableValue, false);
+        case 'sql_notes':
+            return new checkbox($variableValue, true);
+        case 'sql_quote_show_create':
+            return new checkbox($variableValue, true);
+        case 'sql_safe_updates':
+            return new checkbox($variableValue, false);
+        case 'sql_select_limit':
+            return new NumberPicker($variableValue, 0, 18446744073709551615, 10000);
+        case 'sql_warnings':
+            return new checkbox($variableValue, false);
+        case 'ssl_ca':
+            return new DirectoryPicker($variableValue, false);
+        case 'ssl_capath':
+            return new DirectoryPicker($variableValue, false);
+        case 'ssl_key':
+            return new DirectoryPicker($variableValue, false);
+        case 'ssl_cipher':
+            return new TextInput($variableValue, '');
+        case 'ssl_cert':
+            return new DirectoryPicker($variableValue, false);
+        case 'storage_engine':
+            return new TextInput($variableValue, '');
+        case 'stored_program_cache':
+            return new NumberPicker($variableValue, 0, 524288, 0);
+        case 'sync_binlog':
+            return new NumberPicker($variableValue, 0, 4294967295, 0);
+        case 'sync_frm':
+            return new checkbox($variableValue, true);
+        case 'sync_master_info':
+            return new NumberPicker($variableValue, 0, 18446744073709551615, 10000);
+        case 'sync_relay_log':
+            return new NumberPicker($variableValue, 0, 18446744073709551615, 10000);
+        case 'sync_relay_log_info':
+            return new NumberPicker($variableValue, 0, 18446744073709551615, 10000);
+        case 'system_time_zone':
+            return new TextInput($variableValue, '');
         case 'interactive_timeout':
             return new NumberPicker($variableValue, 1, 18446744073709551615, 28800);
+        case 'wait_timeout':
+            return new NumberPicker($variableValue, 1, 31536000, 28800);
+        case 'warning_count':
+            return new TextInput($variableValue, '');
+        case 'time_format':
+            return new TextInput($variableValue, '');
+        case 'time_zone':
+            return new TextInput($variableValue, '');
+        case 'timed_mutexes':
+            return new checkbox($variableValue, false);
+        case 'table_definition_cache':
+            return new NumberPicker($variableValue, -1, 400, 524288);
+        case 'table_open_cache':
+            return new NumberPicker($variableValue, 1, 524288, 2000);
+        case 'table_open_cache_instances':
+            return new NumberPicker($variableValue, 1, 64, 16);
+        case 'thread_cache_size':
+            return new NumberPicker($variableValue, -1, 16384, -1);
+        case 'thread_concurrency':
+            return new NumberPicker($variableValue, 1, 512, 10);
+        case 'thread_handling':
+            return new Enumerator($variableValue,
+                                  'one-thread-per-connection',
+                                  ['no-threads', 'one-thread-per-connection', 'dynamically-loaded']);
+        case 'thread_stack':
+            return new NumberPicker($variableValue, 131072, 18446744073709551615, 262144);
+        case 'tmp_table_size':
+            return new NumberPicker($variableValue, 1024, 18446744073709551615, 16777216);
+        case 'tmpdir':
+            return new DirectoryPicker($variableValue, false);
+        case 'transaction_alloc_block_size':
+            return new NumberPicker($variableValue, 1024, 18446744073709551615, 8192);
+        case 'transaction_prealloc_size':
+            return new NumberPicker($variableValue, 1024, 18446744073709551615, 4096);
+        case 'tx_isolation':
+            return new Enumerator($variableValue,
+                                  'REPEATABLE-READ',
+                                  ['READ-UNCOMMITTED', 'READ-COMMITTED', 'REPEATABLE-READ', 'SERIALIZABLE']);
+        case 'unique_checks':
+            return new checkbox($variableValue, true);
+        case 'updatable_views_with_limit':
+            return new checkbox($variableValue, true);
+        case 'version':
+            return new TextInput($variableValue, '');
+        case 'version_comment':
+            return new TextInput($variableValue, '');
+        case 'version_compile_machine':
+            return new TextInput($variableValue, '');
+        case 'version_compile_os':
+            return new TextInput($variableValue, '');
     }
 
     return new checkbox(false, false);
