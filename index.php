@@ -16,7 +16,7 @@ require_once 'vendor/autoload.php';
  * Date: 24.05.16
  * Time: 16:15
  */
-$pdo = new PDO('mysql:host=localhost;dbname=animal', 'root', 'Deutschrock1');
+$pdo = new PDO('mysql:host=localhost;dbname=animal', 'root', 'Deutschrock');
 
 
 $loader = new Twig_Loader_Filesystem('html');
@@ -278,6 +278,54 @@ function retrieveInputType ($variableName, $variableValue) {
             return new TextInput($variableValue, '');
         case 'version_compile_os':
             return new TextInput($variableValue, '');
+        case 'join_buffer_size':
+            return new NumberPicker($variableValue, 128, 18446744073709547520, 262144);
+        case 'keep_files_on_create':
+            return new checkbox($variableValue, false);
+        case 'key_buffer_size':
+            return new NumberPicker($variableValue, 8, 4294967295, 8388608);
+        case 'key_cache_age_threshold':
+            return new NumberPicker($variableValue, 100, 18446744073709551615, 300);
+        case 'key_cache_block_size':
+            return new NumberPicker($variableValue, 512, 16384, 1024);
+        case 'key_cache_block_size':
+            return new NumberPicker($variableValue, 512, 16384, 1024);
+        case 'key_cache_division_limit':
+            return new NumberPicker($variableValue, 1, 10, 100);
+        case 'large_files_support':
+            return new checkbox($variableValue, false);
+        case 'large_page_size':
+            return new checkbox($variableValue, false);
+        case 'large_pages':
+            return new checkbox($variableValue, false);
+        case 'last_insert_id':
+            return new TextInput($variableValue, '');
+        case 'lc_messages':
+            return new Enumerator($variableValue, 'en_US', ['en_US', 'de_DE', 'DISABLED']);
+        case 'lc_messages_dir':
+            return new DirectoryPicker($variableValue, false);
+        case 'lc_time_names':
+            return new Enumerator($variableValue, 'en_US', ['en_US', 'de_DE', 'DISABLED']);
+        case 'license':
+            return new TextInput($variableValue, '');
+        case 'local_infile':
+            return new checkbox($variableValue, false);
+        case 'lock_wait_timeout':
+            return new NumberPicker($variableValue, 1, 31536000, 31536000);
+        case 'locked_in_memory':
+            return new checkbox($variableValue, false);
+        case 'log_backward_compatible_user_definitions':
+            return new checkbox($variableValue, false);
+        case 'log_bin_trust_function_creators':
+            return new checkbox($variableValue, false);
+        case 'log_builtin_as_identified_by_password':
+            return new checkbox($variableValue, false);
+        case 'log_error_verbosity':
+            return new Enumerator($variableValue, 3, [1, 2, 3]);
+        case 'log_output':
+            return new Enumerator($variableValue, 'FILE', ['TABLE', 'FILE', 'NONE']);
+        case 'log_queries_not_using_indexes':
+            return new checkbox($variableValue, false);
     }
 
     return new checkbox(false, false);
