@@ -31,14 +31,18 @@ class checkbox {
      * @return bool|false
      */
     public function getValue () {
-        return $this->value;
+        if ($this->value === 'true' || $this->value === 'ON') {
+            return true;
+        }
+
+        return false;
     }
 
     /**
      * @return bool|false
      */
     public function getHTMLOutput () {
-        return ['value' => $this->value,
+        return ['value' => $this->getValue(),
                 'elementTemplate' => 'checkbox.html'];
     }
 }

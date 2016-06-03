@@ -5,6 +5,8 @@
     <title>Title</title>
     <link rel="stylesheet"
           href="vendor/twbs/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet"
+          href="vendor/select2/select2/dist/css/select2.min.css">
 </head>
 <body>
 <div class="container-fluid">
@@ -20,4 +22,10 @@
 
 <script src="vendor/components/jquery/jquery.min.js"></script>
 <script src="vendor/twbs/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="vendor/select2/select2/dist/js/select2.min.js"></script>
+<script type="text/javascript">
+    $( document ).ready(function() {
+        $(".set").select2();
+    });
+</script>
 </html>

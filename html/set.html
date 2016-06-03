@@ -1,4 +1,4 @@
-<select class="set">
+<select class="set" multiple="multiple">
     {% for possibleValue in elementValues.possibleValues %}
         <option value="{{ possibleValue }}"
                 {% if elementValues.value == possibleValue %}selected{% endif %}>{{ possibleValue }}</option>

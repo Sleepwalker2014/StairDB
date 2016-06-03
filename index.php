@@ -8,6 +8,7 @@ require_once 'php/NumberPicker.php';
 require_once 'php/DirectoryPicker.php';
 require_once 'php/Enumerator.php';
 require_once 'php/TextInput.php';
+require_once 'php/Set.php';
 require_once 'vendor/autoload.php';
 
 /**
@@ -16,7 +17,7 @@ require_once 'vendor/autoload.php';
  * Date: 24.05.16
  * Time: 16:15
  */
-$pdo = new PDO('mysql:host=localhost;dbname=animal', 'root', 'Deutschrock');
+$pdo = new PDO('mysql:host=localhost;dbname=animal', 'root', 'Deutschrock1');
 
 
 $loader = new Twig_Loader_Filesystem('html');
@@ -176,6 +177,56 @@ function retrieveInputType ($variableName, $variableValue) {
             return new TextInput($variableValue, '');
         case 'insert_id':
             return new TextInput($variableValue, '');
+        case 'relay_log_index':
+            return new DirectoryPicker($variableValue, 'localhost-relay-bin.index');
+        case 'relay_log_info_file':
+            return new DirectoryPicker($variableValue, 'relay-log.info');
+        case 'relay_log_purge':
+            return new checkbox($variableValue, true);
+        case 'relay_log_space_recovery':
+            return new checkbox($variableValue, false);
+        case 'relay_log_space_limit':
+            return new NumberPicker($variableValue, 0, 18446744073709551615, 0);
+        case 'report_host':
+            return new TextInput($variableValue, '');
+        case 'report_password':
+            return new TextInput($variableValue, '');
+        case 'report_port':
+            return new TextInput($variableValue, '');
+        case 'report_user':
+            return new TextInput($variableValue, true);
+        case 'secure_auth':
+            return new checkbox($variableValue, true);
+        case 'server_id':
+            return new NumberPicker($variableValue, 0, 4294967295, 0);
+        case 'skip_external_locking':
+            return new checkbox($variableValue, true);
+        case 'skip_name_resolve':
+            return new checkbox($variableValue, false);
+        case 'skip_networking':
+            return new checkbox($variableValue, false);
+        case 'skip_show_database':
+            return new checkbox($variableValue, false);
+        case 'slave_compressed_protocol':
+            return new checkbox($variableValue, false);
+        case 'slave_exec_mode':
+            return new Enumerator($variableValue,
+                                  'STRICT',
+                                  ['STRICT', 'IDEMPOTENT']);
+        case 'slave_load_tmpdir':
+            return new DirectoryPicker($variableValue, '/tmp');
+        case 'slave_max_allowed_packet':
+            return new NumberPicker($variableValue, 1024, 1073741824, 1073741824);
+        case 'slave_net_timeout':
+            return new NumberPicker($variableValue, 1, 18446744073709551615, 60);
+        case 'slave_transaction_retries':
+            return new NumberPicker($variableValue, 0, 18446744073709551615, 10);
+        case 'slave_type_conversions':
+            return new Set($variableValue, '', ['ALL_LOSSY', 'ALL_NON_LOSSY', 'ALL_SIGNED', 'ALL_UNSIGNED']);
+        case 'slow_launch_time':
+            return new NumberPicker($variableValue, 1, 18446744073709551615, 2);
+        case 'slow_query_log':
+            return new DirectoryPicker($variableValue, 'host_name-slow.log');
         case 'socket':
             return new DirectoryPicker($variableValue, '/tmp/mysql.sock');
         case 'sort_buffer_size':
@@ -286,8 +337,6 @@ function retrieveInputType ($variableName, $variableValue) {
             return new NumberPicker($variableValue, 8, 4294967295, 8388608);
         case 'key_cache_age_threshold':
             return new NumberPicker($variableValue, 100, 18446744073709551615, 300);
-        case 'key_cache_block_size':
-            return new NumberPicker($variableValue, 512, 16384, 1024);
         case 'key_cache_block_size':
             return new NumberPicker($variableValue, 512, 16384, 1024);
         case 'key_cache_division_limit':
