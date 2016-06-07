@@ -177,6 +177,60 @@ function retrieveInputType ($variableName, $variableValue) {
             return new TextInput($variableValue, '');
         case 'insert_id':
             return new TextInput($variableValue, '');
+        case 'performance_schema_max_rwlock_classes':
+            return new TextInput($variableValue, '');
+        case 'performance_schema_max_rwlock_instances':
+            return new TextInput($variableValue, '');
+        case 'performance_schema_max_table_handles':
+            return new TextInput($variableValue, '');
+        case 'performance_schema_max_table_instances':
+            return new TextInput($variableValue, '');
+        case 'performance_schema_max_thread_classes':
+            return new TextInput($variableValue, '');
+        case 'performance_schema_max_thread_instances':
+            return new TextInput($variableValue, '');
+        case 'pid_file':
+            return new DirectoryPicker($variableValue, '/lib/plugin/');
+        case 'plugin_dir':
+            return new DirectoryPicker($variableValue, '/lib/plugin/');
+        case 'port':
+            return new NumberPicker($variableValue, 0, 65535, 3306);
+        case 'preload_buffer_size':
+            return new NumberPicker($variableValue, 1024, 1073741824, 32768);
+        case 'profiling':
+            return new checkbox($variableValue, false);
+        case 'protocol_version':
+            return new TextInput($variableValue, '');
+        case 'proxy_user':
+            return new TextInput($variableValue, '');
+        case 'pseudo_slave_mode':
+            return new checkbox($variableValue, false);
+        case 'pseudo_thread_id':
+            return new TextInput($variableValue, '');
+        case 'query_alloc_block_size':
+            return new NumberPicker($variableValue, 1024, 18446744073709551615, 8192);
+        case 'query_cache_limit':
+            return new NumberPicker($variableValue, 0, 18446744073709551615, 1048576);
+        case 'query_cache_min_res_unit':
+            return new NumberPicker($variableValue, 512, 18446744073709551615, 4096);
+        case 'query_cache_size':
+            return new NumberPicker($variableValue, 512, 18446744073709551615, 4096);
+        case 'query_cache_type':
+            return new Enumerator($variableValue, 0, [0, 1, 2]);
+        case 'query_cache_wlock_invalidate':
+            return new checkbox($variableValue, false);
+        case 'read_only':
+            return new checkbox($variableValue, false);
+        case 'query_prealloc_size':
+            return new NumberPicker($variableValue, 8192, 18446744073709551615, 8192);
+        case 'range_alloc_block_size':
+            return new NumberPicker($variableValue, 4096, 18446744073709547520, 4096);
+        case 'read_buffer_size':
+            return new NumberPicker($variableValue, 8200, 2147479552, 131072);
+        case 'read_rnd_buffer_size':
+            return new NumberPicker($variableValue, 1, 2147483647, 262144);
+        case 'relay_log':
+            return new DirectoryPicker($variableValue, 'localhost-relay-bin');
         case 'relay_log_index':
             return new DirectoryPicker($variableValue, 'localhost-relay-bin.index');
         case 'relay_log_info_file':
