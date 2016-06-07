@@ -17,7 +17,7 @@ require_once 'vendor/autoload.php';
  * Date: 24.05.16
  * Time: 16:15
  */
-$pdo = new PDO('mysql:host=localhost;dbname=animal', 'root', 'Deutschrock1');
+$pdo = new PDO('mysql:host=localhost;dbname=animal', 'root', 'Deutschrock');
 
 
 $loader = new Twig_Loader_Filesystem('html');
@@ -176,6 +176,32 @@ function retrieveInputType ($variableName, $variableValue) {
         case 'init_slave':
             return new TextInput($variableValue, '');
         case 'insert_id':
+            return new TextInput($variableValue, '');
+        case 'optimizer_prune_level':
+            return new TextInput($variableValue, '');
+        case 'optimizer_search_depth':
+            return new TextInput($variableValue, '');
+        case 'optimizer_switch':
+            return new TextInput($variableValue, '');
+        case 'performance_schema':
+            return new TextInput($variableValue, '');
+        case 'performance_schema_events_waits_history_long_size':
+            return new TextInput($variableValue, '');
+        case 'performance_schema_events_waits_history_size':
+            return new TextInput($variableValue, '');
+        case 'performance_schema_max_cond_classes':
+            return new TextInput($variableValue, '');
+        case 'performance_schema_max_cond_instances':
+            return new TextInput($variableValue, '');
+        case 'performance_schema_max_file_classes':
+            return new TextInput($variableValue, '');
+        case 'performance_schema_max_file_handles':
+            return new TextInput($variableValue, '');
+        case 'performance_schema_max_file_instances':
+            return new TextInput($variableValue, '');
+        case 'performance_schema_max_mutex_classes':
+            return new TextInput($variableValue, '');
+        case 'performance_schema_max_mutex_instances':
             return new TextInput($variableValue, '');
         case 'performance_schema_max_rwlock_classes':
             return new TextInput($variableValue, '');
