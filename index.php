@@ -17,7 +17,7 @@ require_once 'vendor/autoload.php';
  * Date: 24.05.16
  * Time: 16:15
  */
-$pdo = new PDO('mysql:host=localhost;dbname=animal', 'root', 'Deutschrock');
+$pdo = new PDO('mysql:host=localhost;dbname=animal', 'root', 'Deutschrock1');
 
 
 $loader = new Twig_Loader_Filesystem('html');
@@ -177,6 +177,22 @@ function retrieveInputType ($variableName, $variableValue) {
             return new TextInput($variableValue, '');
         case 'insert_id':
             return new TextInput($variableValue, '');
+        case 'innodb_thread_sleep_delay':
+            return new NumberPicker($variableValue, 0, 18446744073709551615, 10000);
+        case 'innodb_undo_directory':
+            return new DirectoryPicker($variableValue, false);
+        case 'innodb_undo_log_truncate':
+            return new checkbox($variableValue, false);
+        case 'innodb_undo_logs':
+            return new NumberPicker($variableValue, 0, 128, 128);
+        case 'innodb_undo_tablespaces':
+            return new NumberPicker($variableValue, 0, 95, 0);
+        case 'innodb_use_native_aio':
+            return new checkbox($variableValue, true);
+        case 'innodb_use_sys_mallocuse_sys_malloc':
+            return new checkbox($variableValue, true);
+        case 'innodb_write_io_threads':
+            return new NumberPicker($variableValue, 1, 64, 4);
         case 'optimizer_prune_level':
             return new TextInput($variableValue, '');
         case 'optimizer_search_depth':
