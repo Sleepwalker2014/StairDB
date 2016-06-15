@@ -177,6 +177,36 @@ function retrieveInputType ($variableName, $variableValue) {
             return new TextInput($variableValue, '');
         case 'insert_id':
             return new TextInput($variableValue, '');
+        case 'innodb_read_ahead_threshold':
+            return new NumberPicker($variableValue, 0, 64, 56);
+        case 'innodb_read_io_threads':
+            return new NumberPicker($variableValue, 1, 64, 4);
+        case 'innodb_replication_delay':
+            return new NumberPicker($variableValue, 0, 4294967295, 0);
+        case 'innodb_rollback_on_timeout':
+            return new checkbox($variableValue, false);
+        case 'innodb_rollback_segments':
+            return new NumberPicker($variableValue, 1, 128, 128);
+        case 'innodb_spin_wait_delay':
+            return new NumberPicker($variableValue, 0, 4294967295, 6);
+        case 'innodb_stats_method':
+            return new Enumerator($variableValue,
+                                  'nulls_equal',
+                                  ['nulls_equal', 'nulls_unequal', 'nulls_ignored']);
+        case 'innodb_stats_on_metadata':
+            return new checkbox($variableValue, false);
+        case 'innodb_stats_sample_pages':
+            return new NumberPicker($variableValue, 1, 18446744073709551615, 8);
+        case 'innodb_strict_mode':
+            return new checkbox($variableValue, true);
+        case 'innodb_support_xa':
+            return new checkbox($variableValue, true);
+        case 'innodb_sync_spin_loops':
+            return new NumberPicker($variableValue, 0, 4294967295, 30);
+        case 'innodb_table_locks':
+            return new checkbox($variableValue, true);
+        case 'innodb_thread_concurrency':
+            return new NumberPicker($variableValue, 0, 1000, 0);
         case 'innodb_thread_sleep_delay':
             return new NumberPicker($variableValue, 0, 18446744073709551615, 10000);
         case 'innodb_undo_directory':
