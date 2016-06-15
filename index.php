@@ -177,6 +177,26 @@ function retrieveInputType ($variableName, $variableValue) {
             return new TextInput($variableValue, '');
         case 'insert_id':
             return new TextInput($variableValue, '');
+        case 'innodb_log_group_home_dir':
+            return new DirectoryPicker($variableValue, false);
+        case 'innodb_max_dirty_pages_pct':
+            return new NumberPicker($variableValue, 0, 99, 75);
+        case 'innodb_max_purge_lag':
+            return new NumberPicker($variableValue, 0, 4294967295, 0);
+        case 'innodb_old_blocks_pct':
+            return new NumberPicker($variableValue, 5, 95, 37);
+        case 'innodb_old_blocks_time':
+            return new NumberPicker($variableValue, 0, 18446744073709551615, 1000);
+        case 'innodb_open_files':
+            return new NumberPicker($variableValue, 10, 4294967295, -1);
+        case 'innodb_print_all_deadlocks':
+            return new checkbox($variableValue, false);
+        case 'innodb_purge_batch_size':
+            return new NumberPicker($variableValue, 1, 5000, 300);
+        case 'innodb_purge_threads':
+            return new NumberPicker($variableValue, 1, 32, 4);
+        case 'innodb_random_read_ahead':
+            return new checkbox($variableValue, false);
         case 'innodb_read_ahead_threshold':
             return new NumberPicker($variableValue, 0, 64, 56);
         case 'innodb_read_io_threads':
