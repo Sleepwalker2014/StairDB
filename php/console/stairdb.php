@@ -9,5 +9,5 @@
 showApplicationInfo();
 
 function showApplicationInfo () {
-    echo "hi".PHP_EOL;
+    echo "Welcome to StairDB version 1.0".PHP_EOL;
 }
