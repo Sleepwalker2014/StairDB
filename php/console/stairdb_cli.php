@@ -22,8 +22,12 @@ function parseArguments ($argv) {
 
     if ($argv[1] === '--dump-conf') {
         $serverVariables = getServerVariables(new PDO('mysql:host=localhost;dbname=animal', 'root', 'Deutschrock1'));
+
+        if ($argv[2] === '--xml') {
+            dumpConfigIntoXML($serverVariables);
+        }
+
         dumpConfig(new PDO('mysql:host=localhost;dbname=animal', 'root', 'Deutschrock1'));
-        dumpConfigIntoXML($serverVariables);
     }
 }
 
@@ -54,14 +58,16 @@ function dumpConfig (PDO $pdo) {
                      $result['Value'].PHP_EOL;
     }
     echo "\033[0m";
+
+    exit(1);
 }
 
-function dumpConfigIntoXML (array $serverVariables) {
+function dumpConfigIntoXML (array $serverVariables, $filePath = "/tmp/mysqlSettingDump.xml") {
     $writer = new XMLWriter();
 
-    $writer->openURI('test.xml');
+    $writer->openURI($filePath);
     $writer->startDocument('1.0');
-    $writer->setIndent(4);
+    $writer->setIndent(true);
 
     $writer->startElement('variable');
 
@@ -73,6 +79,10 @@ function dumpConfigIntoXML (array $serverVariables) {
 
     $writer->endDocument();
     $writer->flush();
+
+    echo 'successfully dumped mysql settings into '.$filePath.PHP_EOL;
+
+    exit(1);
 }
 
 function getServerVariables (PDO $pdo) {
