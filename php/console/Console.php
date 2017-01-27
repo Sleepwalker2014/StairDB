@@ -58,6 +58,7 @@ class Console {
                 if (!empty($this->consoleArguments[3])) {
                     $filePath = $this->consoleArguments[3];
                 }
+                echo $filePath;
 
                 $this->dumpConfigIntoXML($serverVariables, $filePath);
 
@@ -70,7 +71,7 @@ class Console {
         }
 
         if ($this->consoleArguments[1] === self::IMPORT_CONFIG_PARAMETER) {
-            $serverVariables = $this->getServerVariablesByXML('/tmp/test.xml');
+            $serverVariables = $this->getServerVariablesByXML($this->consoleArguments[2]);
 
             exit(0);
         }
@@ -141,13 +142,26 @@ class Console {
     }
 
     private function getServerVariablesByXML ($xmlPath) {
+        if (!is_file($xmlPath)) {
+            echo 'Die Datei '.$xmlPath.' existiert nicht.'.PHP_EOL;
+
+            exit(1);
+        }
+
         $serverVariables = simplexml_load_file($xmlPath);
 
         foreach ($serverVariables as $variableName => $variableValue) {
-
+            echo $variableName.' '.$variableValue;
+            $this->setServerVariable($variableName, $variableValue);
         }
 
         return $serverVariables;
+    }
+
+    private function setServerVariable ($variable, $value) {
+        $pdo = new PDO('mysql:host=localhost;dbname=animal', 'root', 'Deutschrock1');
+
+        $pdo->exec('SET GLOBAL '.$variable.' = '.$value);
     }
 
     /**
