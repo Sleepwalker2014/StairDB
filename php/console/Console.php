@@ -2,6 +2,8 @@
 namespace php\console\Console;
 
 use PDO;
+use PDOException;
+use SimpleXMLElement;
 use XMLReader;
 use XMLWriter;
 
@@ -16,6 +18,13 @@ class Console {
     const DUMP_CONFIG_PARAMETER = '--dump-conf';
     const IMPORT_CONFIG_PARAMETER = '--import-conf';
     const XML_DUMP_PARAMETER = '--xml';
+    const DIFF_DATABASE_PARAMETER = '--diff';
+
+    const GREEN_TEXT = "\033[0;32m";
+    const RED_TEXT = "\033[032;41m";
+    const WHITE_TEXT = "\033[0m";
+
+    const STANDARD_CONFIG_PATH = 'stairdb_conf.xml';
 
     private $consoleArguments;
 
@@ -51,21 +60,34 @@ class Console {
         }
 
         if ($this->consoleArguments[1] === self::DUMP_CONFIG_PARAMETER) {
-            $serverVariables = $this->getServerVariables(new PDO('mysql:host=localhost;dbname=animal', 'root', 'Deutschrock1'));
+            $pdoConnections = $this->getConnectionsByXML(self::STANDARD_CONFIG_PATH);
+            $serverVariables = $this->getServerVariables($pdoConnections[0]);
 
             if ($this->consoleArguments[2] === self::XML_DUMP_PARAMETER) {
-                $filePath = null;
+                $xmlOutputPath = null;
                 if (!empty($this->consoleArguments[3])) {
-                    $filePath = $this->consoleArguments[3];
+                    $xmlOutputPath = $this->consoleArguments[3];
                 }
-                echo $filePath;
 
-                $this->dumpConfigIntoXML($serverVariables, $filePath);
+                $this->dumpConfigIntoXML($serverVariables, $xmlOutputPath);
 
                 exit(0);
             }
 
-            $this->showConfig(new PDO('mysql:host=localhost;dbname=animal', 'root', 'Deutschrock1'));
+            $this->showConfig($pdoConnections[1]);
+
+            exit(0);
+        }
+
+        if ($this->consoleArguments[1] === self::DIFF_DATABASE_PARAMETER) {
+            $configPath = self::STANDARD_CONFIG_PATH;
+            if (!empty($this->consoleArguments[2])) {
+                $configPath = $this->consoleArguments[2];
+            }
+
+            $diffPdoConnections = $this->getConnectionsByXML($configPath);
+
+            $this->printComparedDatabaseSettings($this->compareDatabaseSettings($diffPdoConnections));
 
             exit(0);
         }
@@ -165,9 +187,157 @@ class Console {
     }
 
     /**
+     * @param string $xmlPath
+     */
+    private function getConnectionsByXML ($xmlPath) {
+        $pdoConnections = [];
+
+        if (!is_file($xmlPath)) {
+            echo 'Die Datei '.$xmlPath.' existiert nicht.'.PHP_EOL;
+
+            exit(1);
+        }
+
+        /** @var SimpleXMLElement[] $xmlConnections */
+        $xmlConnections = simplexml_load_file($xmlPath);
+
+        foreach ($xmlConnections as $xmlConnection) {
+            $connectionAttributes = $xmlConnection->attributes();
+
+            $id = $connectionAttributes['id'];
+            $server = $connectionAttributes['server'];
+            $port = $connectionAttributes['port'];
+            $database = $connectionAttributes['database'];
+            $user = $connectionAttributes['user'];
+            $password = $connectionAttributes['password'];
+
+            try {
+                $pdoConnections[] = new PDO('mysql:host='.$server.';dbname='.$database, $user, $password);
+            } catch (PDOException $e) {
+                $this->printPDOErrorMessage($e, $user, $database, $password);
+
+                exit(1);
+            }
+        }
+
+        return $pdoConnections;
+    }
+
+    /**
+     * @param PDO[] $pdoConnections
+     *
+     * @return array
+     * @internal param string $xmlPath
+     */
+    private function compareDatabaseSettings (array $pdoConnections) {
+        $compareOutput = [];
+        $possibleVariables = [];
+        $allConnectionVariables = [];
+
+        foreach ($pdoConnections as $pdoConnection) {
+            $tmpVariables = $this->getServerVariables($pdoConnection);
+            $allConnectionVariables[] = $tmpVariables;
+
+            foreach ($tmpVariables as $tmpVariable => $variableValue) {
+                $possibleVariables[$tmpVariable] = $tmpVariable;
+            }
+        }
+
+        foreach ($possibleVariables as $possibleVariable) {
+            $variableDiffers = false;
+            $firstVariable = null;
+
+            foreach ($allConnectionVariables as $allConnectionVariableIndex => $connectionVariables) {
+                if (!isset($connectionVariables[$possibleVariable])) {
+                    $compareOutput[$possibleVariable]['databases'][$allConnectionVariableIndex] = 'N.A.';
+                    $variableDiffers = true;
+                } else {
+                    $compareOutput[$possibleVariable]['databases'][$allConnectionVariableIndex] = $connectionVariables[$possibleVariable];
+                }
+
+                if ($firstVariable === null) {
+                    $firstVariable = $compareOutput[$possibleVariable]['databases'][$allConnectionVariableIndex];
+                }
+
+                if ($firstVariable !== $compareOutput[$possibleVariable]['databases'][$allConnectionVariableIndex]) {
+                    $variableDiffers = true;
+                }
+            }
+
+            $compareOutput[$possibleVariable]['variableDiffers'] = $variableDiffers;
+        }
+
+        return $compareOutput;
+    }
+
+    /**
+     * @param []mixed $compareOutput
+     */
+    public function printComparedDatabaseSettings (array $compareOutput) {
+        foreach ($compareOutput as $variableName => $databaseVariables) {
+            $textColour = self::GREEN_TEXT;
+
+            if ($databaseVariables['variableDiffers']) {
+                $textColour = self::RED_TEXT;
+            }
+
+            $this->setConsoleTextColor($textColour);
+
+            echo str_pad($variableName, 55, ' ', STR_PAD_RIGHT).'| ';
+
+            foreach ($databaseVariables['databases'] as $variableValue) {
+                $value = explode(',', $variableValue);
+
+                $longestExplode = count($value);
+
+                echo str_pad($value[0], 40, ' ', STR_PAD_RIGHT).'| ';
+            }
+
+            $this->setConsoleTextColor(self::WHITE_TEXT);
+
+            echo PHP_EOL;
+        }
+    }
+
+    public function setConsoleTextColor ($colour) {
+        echo $colour;
+    }
+
+    /**
      * @return []mixed $consoleArguments - the console arguments
      */
     public function getArgv () {
         return $this->consoleArguments;
+    }
+
+    /**
+     * @param PDOException $e
+     * @param              $user
+     * @param              $database
+     * @param              $password
+     *
+     * @return bool
+     */
+    private function printPDOErrorMessage (PDOException $e, $user, $database, $password) {
+        $errorCode = $e->getCode();
+
+        switch ($errorCode) {
+            case 1045:
+                echo 'Zugriff verweigert für den Benutzer '.$user.PHP_EOL;
+                break;
+            case 1044:
+                echo 'Zugriff verweigert für den Benutzer '.$user.PHP_EOL;
+                break;
+            case 2005:
+                echo 'Der angegebene Server ist unbekannt oder nicht erreichbar'.PHP_EOL;
+                break;
+            case 1049:
+                echo 'Die angegebene Datenbank '.$database.' existiert nicht'.PHP_EOL;
+                break;
+            default:
+                echo 'Es ist ein Problem mit der Datenbankverbindung aufgetreten';
+        }
+
+        return true;
     }
 }

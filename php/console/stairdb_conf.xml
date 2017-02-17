@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<connections>
+    <connection id="dummyId" server="localhost" port="dummyPort" database="animal" user="labaccess" password="la333ss"/>
+    <connection id="dummyId1" server="192.168.56.101" port="3360" database="labaccess" user="labaccess" password="la333ss"/>
+</connections>
