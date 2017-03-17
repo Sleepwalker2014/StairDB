@@ -19,6 +19,7 @@ class Console {
     const IMPORT_CONFIG_PARAMETER = '--import-conf';
     const XML_DUMP_PARAMETER = '--xml';
     const DIFF_DATABASE_PARAMETER = '--diff';
+    const ADD_CONNECTION_PARAMETER = '--add-connection';
 
     const GREEN_TEXT = "\033[0;32m";
     const RED_TEXT = "\033[032;41m";
@@ -98,6 +99,12 @@ class Console {
             exit(0);
         }
 
+        if ($this->consoleArguments[1] === self::ADD_CONNECTION_PARAMETER) {
+            $this->addConnectionToXML();
+
+            exit(0);
+        }
+
         $this->showApplicationInfo();
     }
 
@@ -123,6 +130,134 @@ class Console {
                  $result['Value'].PHP_EOL;
         }
         echo "\033[0m";
+    }
+
+    public function addConnection (PDO $pdo) {
+        $tableQuery = $pdo->prepare('SHOW variables;');
+        $tableQuery->execute();
+
+        $results = $tableQuery->fetchAll(PDO::FETCH_ASSOC);
+
+        echo "\033[0;32m";
+        foreach ($results as $result) {
+            echo str_pad($result['Variable_name'], 55).
+                 $result['Value'].PHP_EOL;
+        }
+        echo "\033[0m";
+    }
+
+    public function addConnectionToXML ($filePath = null) {
+        if (empty($filePath)) {
+            $filePath = 'stairdb_conf.xml';
+        }
+
+        $idParameterIndex = array_search('-id', $this->consoleArguments);
+        if (!$idParameterIndex || !isset($this->consoleArguments[$idParameterIndex + 1])) {
+            return false;
+        }
+
+        $id = $this->consoleArguments[$idParameterIndex + 1];
+
+        $hostParameterIndex = array_search('-host', $this->consoleArguments);
+        if (!$hostParameterIndex || !isset($this->consoleArguments[$hostParameterIndex + 1])) {
+            return false;
+        }
+
+        $host = $this->consoleArguments[$hostParameterIndex + 1];
+
+        if (!filter_var($host, FILTER_VALIDATE_IP) && $host !== 'localhost') {
+            return false;
+        }
+
+        $databaseParameterIndex = array_search('-database', $this->consoleArguments);
+        if (!$databaseParameterIndex || !isset($this->consoleArguments[$databaseParameterIndex + 1])) {
+            return false;
+        }
+
+        $database = $this->consoleArguments[$databaseParameterIndex + 1];
+
+        $userParameterIndex = array_search('-user', $this->consoleArguments);
+        if (!$userParameterIndex || !isset($this->consoleArguments[$userParameterIndex + 1])) {
+            return false;
+        }
+
+        $user = $this->consoleArguments[$userParameterIndex + 1];
+
+        $passwordParameterIndex = array_search('-password', $this->consoleArguments);
+        if (!$passwordParameterIndex || !isset($this->consoleArguments[$passwordParameterIndex + 1])) {
+            return false;
+        }
+
+        $password = $this->consoleArguments[$passwordParameterIndex + 1];
+
+        $xml = simplexml_load_file($filePath);
+
+        if (!empty($xml->xpath('//connection[@id="'.$id.'"]'))) {
+            echo 'Die Verbindung mit der ID '.$id.' existiert schon in der Konfiguration, überschreiben?';
+            echo PHP_EOL;
+
+            $overwriteConnection = readline('ja/nein');
+
+            if ($overwriteConnection === 'ja') {
+                $this->overwriteConnectionToXML($xml, $id, $host, $database, $user, $password, $filePath);
+            }
+
+            return true;
+        }
+
+        $this->writeConnectionToXML($xml, $id, $host, $database, $user, $password, $filePath);
+
+        return true;
+    }
+
+    /**
+     * @param SimpleXMLElement $xml
+     * @param                  $id
+     * @param                  $host
+     * @param                  $database
+     * @param                  $user
+     * @param                  $password
+     * @param                  $filePath
+     */
+    public function writeConnectionToXML (SimpleXMLElement $xml, $id, $host, $database, $user, $password, $filePath) {
+        $connection = $xml->addChild('connection');
+
+        $connection->addAttribute('id', $id);
+        $connection->addAttribute('server', $host);
+        $connection->addAttribute('port', '');
+        $connection->addAttribute('database', $database);
+        $connection->addAttribute('user', $user);
+        $connection->addAttribute('password', $password);
+
+        $xml->asXML($filePath);
+    }
+
+    /**
+     * @param SimpleXMLElement $xml
+     * @param                  $id
+     * @param                  $host
+     * @param                  $database
+     * @param                  $user
+     * @param                  $password
+     * @param                  $filePath
+     */
+    public function overwriteConnectionToXML (SimpleXMLElement $xml,
+                                              $id,
+                                              $host,
+                                              $database,
+                                              $user,
+                                              $password,
+                                              $filePath) {
+        $changeNode = $xml->xpath('//connection[@id="'.$id.'"]')[0];
+
+        $attributes = $changeNode->attributes();
+
+        $attributes->server = $host;
+        $attributes->database = $database;
+        $attributes->user = $user;
+        $attributes->password = $password;
+
+        $xml->asXML($filePath);
     }
 
     public function dumpConfigIntoXML (array $serverVariables, $filePath = null) {
