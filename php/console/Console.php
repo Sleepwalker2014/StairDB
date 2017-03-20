@@ -20,6 +20,7 @@ class Console {
     const XML_DUMP_PARAMETER = '--xml';
     const DIFF_DATABASE_PARAMETER = '--diff';
     const ADD_CONNECTION_PARAMETER = '--add-connection';
+    const ID_PARAMETER = '--id';
 
     const GREEN_TEXT = "\033[0;32m";
     const RED_TEXT = "\033[032;41m";
@@ -28,6 +29,7 @@ class Console {
     const STANDARD_CONFIG_PATH = 'stairdb_conf.xml';
 
     private $consoleArguments;
+    const XML_STANDARD_DUMP_PATH = '/tmp/stair.xml';
 
     /**
      * @var $xmlWriter XMLWriter
@@ -47,6 +49,10 @@ class Console {
         $this->routeCommand();
     }
 
+    public function writeGreenText ($string) {
+        echo self::GREEN_TEXT.$string.self::WHITE_TEXT;
+    }
+
     private function routeCommand () {
         if (empty($this->consoleArguments[1])) {
             $this->showApplicationInfo();
@@ -61,10 +67,27 @@ class Console {
         }
 
         if ($this->consoleArguments[1] === self::DUMP_CONFIG_PARAMETER) {
-            $pdoConnections = $this->getConnectionsByXML(self::STANDARD_CONFIG_PATH);
-            $serverVariables = $this->getServerVariables($pdoConnections[0]);
+            if (empty($this->consoleArguments[2]) ||
+                $this->consoleArguments[2] !== self::ID_PARAMETER ||
+                empty($this->consoleArguments[3])) {
 
-            if ($this->consoleArguments[2] === self::XML_DUMP_PARAMETER) {
+                echo 'Bitte geben Sie eine Datenbank ID mit dem Parameter --id an'.PHP_EOL;
+
+                exit(1);
+            }
+
+            $connectionId = $this->consoleArguments[3];
+
+            $pdoConnection = $this->getConnectionsByXML(self::STANDARD_CONFIG_PATH, $connectionId);
+
+            if (empty($pdoConnection)) {
+                echo 'Es wurde keine Verbindung mit der ID '.$connectionId.' gefunden'.PHP_EOL;
+
+                exit(1);
+            }
+            $serverVariables = $this->getServerVariables($pdoConnection[0]);
+
+            if ($this->consoleArguments[3] === self::XML_DUMP_PARAMETER) {
                 $xmlOutputPath = null;
                 if (!empty($this->consoleArguments[3])) {
                     $xmlOutputPath = $this->consoleArguments[3];
@@ -75,7 +98,7 @@ class Console {
                 exit(0);
             }
 
-            $this->showConfig($pdoConnections[1]);
+            $this->showConfig($pdoConnection);
 
             exit(0);
         }
@@ -142,6 +165,20 @@ class Console {
         foreach ($results as $result) {
             echo str_pad($result['Variable_name'], 55).
                  $result['Value'].PHP_EOL;
+        }
+        echo "\033[0m";
+    }
+
+    public function getConnectionById (PDO $pdo) {
+        $tableQuery = $pdo->prepare('SHOW variables;');
+        $tableQuery->execute();
+
+        $results = $tableQuery->fetchAll(PDO::FETCH_ASSOC);
+
+        echo "\033[0;32m";
+        foreach ($results as $result) {
+            echo str_pad($result['Variable_name'], 55).
+                $result['Value'].PHP_EOL;
         }
         echo "\033[0m";
     }
@@ -262,14 +299,19 @@ class Console {
 
     public function dumpConfigIntoXML (array $serverVariables, $filePath = null) {
         if (empty($filePath)) {
-            $filePath = '/tmp/test.xml';
+            $filePath = self::XML_STANDARD_DUMP_PATH;
         }
 
-        $this->xmlWriter->openURI($filePath);
+        if (!$this->xmlWriter->openURI($filePath)) {
+            echo $filePath.' ist kein existenter Pfad';
+
+            exit(1);
+        }
+
         $this->xmlWriter->startDocument('1.0');
         $this->xmlWriter->setIndent(true);
 
-        $this->xmlWriter->startElement('variable');
+        $this->xmlWriter->startElement('variables');
 
         foreach ($serverVariables as $variableName => $variableValue) {
             $this->xmlWriter->writeElement($variableName, htmlspecialchars($variableValue));
@@ -280,7 +322,7 @@ class Console {
         $this->xmlWriter->endDocument();
         $this->xmlWriter->flush();
 
-        echo 'successfully dumped mysql settings into '.$filePath.PHP_EOL;
+        $this->writeGreenText('Die Datenbankeinstellungen wurden erfolgreich nach '.$filePath.' exportiert'.PHP_EOL);
     }
 
     private function getServerVariables (PDO $pdo) {
@@ -323,8 +365,11 @@ class Console {
 
     /**
      * @param string $xmlPath
+     *
+     * @param string|null $id
+     * @return PDO[]
      */
-    private function getConnectionsByXML ($xmlPath) {
+    private function getConnectionsByXML ($xmlPath, $id = null) {
         $pdoConnections = [];
 
         if (!is_file($xmlPath)) {
@@ -333,8 +378,12 @@ class Console {
             exit(1);
         }
 
-        /** @var SimpleXMLElement[] $xmlConnections */
+        /** @var SimpleXMLElement $xmlConnections */
         $xmlConnections = simplexml_load_file($xmlPath);
+
+        if ($id) {
+            $xmlConnections = $xmlConnections->xpath('//connection[@id="'.$id.'"]');
+        }
 
         foreach ($xmlConnections as $xmlConnection) {
             $connectionAttributes = $xmlConnection->attributes();
