@@ -134,7 +134,8 @@ class Console {
     public function showApplicationInfo () {
         echo 'Welcome to StairDB version 1.0'.PHP_EOL.PHP_EOL;
 
-        echo 'Verwendung: stairdb [--version] [--help] [--dump-conf]'.PHP_EOL;
+        echo 'Verwendung: stairdb [--version] [--help] [--dump-conf]'.'
+              ['.self::ADD_CONNECTION_PARAMETER.'] ['.self::DIFF_DATABASE_PARAMETER.']'.PHP_EOL;
     }
 
     public function showVersion () {
@@ -169,6 +170,7 @@ class Console {
         echo "\033[0m";
     }
 
+
     public function getConnectionById (PDO $pdo) {
         $tableQuery = $pdo->prepare('SHOW variables;');
         $tableQuery->execute();
@@ -178,9 +180,27 @@ class Console {
         echo "\033[0;32m";
         foreach ($results as $result) {
             echo str_pad($result['Variable_name'], 55).
-                $result['Value'].PHP_EOL;
+                 $result['Value'].PHP_EOL;
         }
         echo "\033[0m";
+    }
+
+    public function isValidIp ($ip) {
+        if (filter_var($ip, FILTER_VALIDATE_IP) || $ip === 'localhost') {
+            return true;
+        }
+
+        return false;
+    }
+
+    public function getConsoleParameterIfExisting ($parameter) {
+        $idParameterIndex = array_search($parameter, $this->consoleArguments);
+
+        if ($idParameterIndex && isset($this->consoleArguments[$idParameterIndex + 1])) {
+            return $this->consoleArguments[$idParameterIndex + 1];
+        }
+
+        return null;
     }
 
     public function addConnectionToXML ($filePath = null) {
@@ -188,50 +208,51 @@ class Console {
             $filePath = 'stairdb_conf.xml';
         }
 
-        $idParameterIndex = array_search('-id', $this->consoleArguments);
-        if (!$idParameterIndex || !isset($this->consoleArguments[$idParameterIndex + 1])) {
-            return false;
+        $id = $this->getConsoleParameterIfExisting('-id');
+        if (!$id) {
+            echo 'Bitte geben Sie über den Parameter -id eine beliebige ID für die neue Datenverbindung an.'.PHP_EOL;
+
+            exit(1);
         }
 
-        $id = $this->consoleArguments[$idParameterIndex + 1];
+        $host = $this->getConsoleParameterIfExisting('-host');
+        if (!$host) {
+            echo 'Bitte geben Sie über den Parameter -host eine gültige IP Addresse ein.'.PHP_EOL;
 
-        $hostParameterIndex = array_search('-host', $this->consoleArguments);
-        if (!$hostParameterIndex || !isset($this->consoleArguments[$hostParameterIndex + 1])) {
-            return false;
+            exit(1);
         }
 
-        $host = $this->consoleArguments[$hostParameterIndex + 1];
+        if (!$this->isValidIp($host)) {
+            echo 'Der angegebene Host '.$host.' ist keine gültige IP Adresse.'.PHP_EOL;
 
-        if (!filter_var($host, FILTER_VALIDATE_IP) && $host !== 'localhost') {
-            return false;
+            exit(1);
         }
 
-        $databaseParameterIndex = array_search('-database', $this->consoleArguments);
-        if (!$databaseParameterIndex || !isset($this->consoleArguments[$databaseParameterIndex + 1])) {
-            return false;
+        $database = $this->getConsoleParameterIfExisting('-database');
+        if (!$database) {
+            echo 'Bitte geben Sie über den Parameter -database einen Datenbanknamen ein.'.PHP_EOL;
+
+            exit(1);
         }
 
-        $database = $this->consoleArguments[$databaseParameterIndex + 1];
+        $user = $this->getConsoleParameterIfExisting('-user');
+        if (!$user) {
+            echo 'Bitte geben Sie über den Parameter -user einen Benutzernamen ein.'.PHP_EOL;
 
-        $userParameterIndex = array_search('-user', $this->consoleArguments);
-        if (!$userParameterIndex || !isset($this->consoleArguments[$userParameterIndex + 1])) {
-            return false;
+            exit(1);
         }
 
-        $user = $this->consoleArguments[$userParameterIndex + 1];
+        $password = $this->getConsoleParameterIfExisting('-password');
+        if (!$password) {
+            echo 'Bitte geben Sie über den Parameter -user ein Passwort ein.'.PHP_EOL;
 
-        $passwordParameterIndex = array_search('-password', $this->consoleArguments);
-        if (!$passwordParameterIndex || !isset($this->consoleArguments[$passwordParameterIndex + 1])) {
-            return false;
+            exit(1);
         }
-
-        $password = $this->consoleArguments[$passwordParameterIndex + 1];
 
         $xml = simplexml_load_file($filePath);
 
         if (!empty($xml->xpath('//connection[@id="'.$id.'"]'))) {
-            echo 'Die Verbindung mit der ID '.$id.' existiert schon in der Konfiguration, überschreiben?';
-            echo PHP_EOL;
+            echo 'Die Verbindung mit der ID '.$id.' existiert schon in der Konfiguration, überschreiben?'.PHP_EOL;
 
             $overwriteConnection = readline('ja/nein');
 

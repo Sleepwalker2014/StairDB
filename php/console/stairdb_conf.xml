@@ -1,4 +1,9 @@
 <?xml version="1.0"?>
 <connections>
     <connection id="e" server="localhost" port="" database="animal" user="root" password="Deutschrock"/>
+    <connection id="e" server="localhost" port="dummyPort" database="animal" user="labaccess" password="la333ss"/>
+    <connection id="d" server="192.168.18.20" port="3360" database="uiui" user="fucker" password="mistkerl"/>
+    <connection id="f" server="192.168.18.20" port="" database="uiui" user="fucker" password="mistkerl"/>
+    <connection id="egwwwwwwww" server="localhost" port="" database="f" user="marcel" password="Deutschrock11"/>
+    <connection id="heer" server="localhost" port="" database="animagggl" user="marcel" password="Deutschrock11"/>
 </connections>
