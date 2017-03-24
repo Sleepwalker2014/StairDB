@@ -98,7 +98,7 @@ class Console {
                 exit(0);
             }
 
-            $this->showConfig($pdoConnection);
+            $this->showConfig($pdoConnection[0]);
 
             exit(0);
         }
