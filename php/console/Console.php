@@ -53,6 +53,10 @@ class Console {
         echo self::GREEN_TEXT.$string.self::WHITE_TEXT;
     }
 
+    public function writeRedText ($string) {
+        echo self::RED_TEXT.$string.self::WHITE_TEXT;
+    }
+
     private function routeCommand () {
         if (empty($this->consoleArguments[1])) {
             $this->showApplicationInfo();
@@ -81,10 +85,14 @@ class Console {
             $pdoConnection = $this->getConnectionsByXML(self::STANDARD_CONFIG_PATH, $connectionId);
 
             if (empty($pdoConnection)) {
-                echo 'Es wurde keine Verbindung mit der ID '.$connectionId.' gefunden'.PHP_EOL;
+                $this->writeRedText('Es wurde keine Verbindung mit der ID '.$connectionId.' gefunden');
+                echo PHP_EOL.PHP_EOL;
+
+                $this->dumpConnectionsToConsole(self::STANDARD_CONFIG_PATH);
 
                 exit(1);
             }
+
             $serverVariables = $this->getServerVariables($pdoConnection[0]);
 
             if ($this->consoleArguments[3] === self::XML_DUMP_PARAMETER) {
@@ -205,7 +213,22 @@ class Console {
 
     public function addConnectionToXML ($filePath = null) {
         if (empty($filePath)) {
-            $filePath = 'stairdb_conf.xml';
+            $filePath = self::STANDARD_CONFIG_PATH;
+        }
+
+        if (!file_exists($filePath)) {
+            $this->xmlWriter->openURI($filePath);
+            $this->xmlWriter->startDocument('1.0');
+            $this->xmlWriter->setIndent(true);
+
+            $this->xmlWriter->startElement('connections');
+
+            $this->xmlWriter->fullEndElement();
+
+            $this->xmlWriter->endDocument();
+            $this->xmlWriter->flush();
+
+            $this->writeGreenText('Die Datenbankeinstellungen wurden erfolgreich nach '.$filePath.' exportiert'.PHP_EOL);
         }
 
         $id = $this->getConsoleParameterIfExisting('-id');
@@ -475,6 +498,69 @@ class Console {
         return $compareOutput;
     }
 
+    private function dumpConnectionsToConsole ($xmlPath) {
+        if (!is_file($xmlPath)) {
+            echo 'Die Datei '.$xmlPath.' existiert nicht.'.PHP_EOL;
+
+            exit(1);
+        }
+
+        $this->writeGreenText('Es existieren folgende Verbindungen:');
+        echo PHP_EOL.PHP_EOL;
+
+        /** @var SimpleXMLElement $xmlConnections */
+        $xmlConnections = simplexml_load_file($xmlPath);
+
+        $maxIdLength = 0;
+        $maxServerLength = 0;
+        $maxDatabaseLength = 0;
+        $maxUserLength = 0;
+        $maxPortLength = 0;
+
+        foreach ($xmlConnections as $xmlConnection) {
+            $connectionAttributes = $xmlConnection->attributes();
+
+            if (strlen($connectionAttributes['id']) > $maxIdLength) {
+                $maxIdLength = strlen($connectionAttributes['id']);
+            }
+
+            if (strlen($connectionAttributes['database']) > $maxDatabaseLength) {
+                $maxDatabaseLength = strlen($connectionAttributes['database']);
+            }
+
+            if (strlen($connectionAttributes['server']) > $maxServerLength) {
+                $maxServerLength = strlen($connectionAttributes['server']);
+            }
+
+            if (strlen($connectionAttributes['port']) > $maxPortLength) {
+                $maxPortLength = strlen($connectionAttributes['port']);
+            }
+
+            if (strlen($connectionAttributes['user']) > $maxUserLength) {
+                $maxUserLength = strlen($connectionAttributes['user']);
+            }
+        }
+
+        $this->writeGreenText(str_pad('ID', $maxIdLength + 2, ' ').
+                              str_pad('Datenbank', $maxDatabaseLength + 2, ' ').
+                              str_pad('Server', $maxServerLength + 2, ' ').
+                              str_pad('Port', $maxPortLength + 2, ' ').
+                              str_pad('Benutzer', $maxUserLength + 2, ' '));
+        echo PHP_EOL.PHP_EOL;
+        foreach ($xmlConnections as $xmlConnection) {
+            $connectionAttributes = $xmlConnection->attributes();
+
+            $this->writeGreenText(str_pad($connectionAttributes['id'], $maxIdLength + 2, ' '));
+            $this->writeGreenText(str_pad($connectionAttributes['database'], $maxDatabaseLength + 2, ' '));
+            $this->writeGreenText(str_pad($connectionAttributes['server'], $maxServerLength + 2, ' '));
+            $this->writeGreenText(str_pad($connectionAttributes['port'], $maxPortLength + 2, ' '));
+            $this->writeGreenText(str_pad($connectionAttributes['user'], $maxUserLength + 2, ' '));
+            echo PHP_EOL;
+        }
+
+        echo PHP_EOL;
+    }
+
     /**
      * @param []mixed $compareOutput
      */
@@ -540,7 +626,7 @@ class Console {
                 echo 'Die angegebene Datenbank '.$database.' existiert nicht'.PHP_EOL;
                 break;
             default:
-                echo 'Es ist ein Problem mit der Datenbankverbindung aufgetreten';
+                echo $this->writeRedText('Es ist ein Problem mit der Datenbankverbindung aufgetreten').PHP_EOL;
         }
 
         return true;
